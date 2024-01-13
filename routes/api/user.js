@@ -6,6 +6,7 @@ const checkAuth = require('../../middleware/auth-middleware')
 require('dotenv').config()
 
 const User = require('../../model/User')
+const Chat = require('../../model/Chat')
 
 router.post('/register', async (req, res) => {
   try {
@@ -51,7 +52,9 @@ router.post('/login', async (req, res) => {
 })
 
 router.get('/home', checkAuth, (req, res) => {
-  res.json({ message: 'Authorization successfull' })
+  Chat.find()
+  .then(chats => (chats.length > 0) ? res.status(200).json(chats) : res.status(404).json({message: 'No chats found'}))
+  .catch(err => res.status(500).json({message: err.message}))
 })
 
 module.exports = router
