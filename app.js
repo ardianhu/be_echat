@@ -4,6 +4,7 @@ const { connect } = require('mongoose')
 const connectDB = require('./config/db')
 const routes = require('./routes/api/user')
 const chatRoutes = require('./routes/api/chat')
+const messageRoutes = require('./routes/api/message')
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const app = express()
@@ -15,6 +16,7 @@ app.use(bodyParser.urlencoded({extended: true}))
 
 app.use('/api/user', routes)
 app.use('/api/chat', chatRoutes)
+app.use('/api/message', messageRoutes)
 
 connectDB()
 

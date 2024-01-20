@@ -20,7 +20,7 @@ router.post('/', checkAuth, async (req, res) => {
 })
 router.get('/', (req, res) => {
   Chat.find()
-  .then(chat => (chat.length > 0) ? res.status(200).json(chat) : res.status(404).json({message: 'No chats found'}))
+  .then(chat => (chat.length > 0) ? res.status(200).json({message: "succes", chat: chat}) : res.status(404).json({message: 'No chats found'}))
   .catch(err => res.status(500).json({message: err.message}))
 })
 

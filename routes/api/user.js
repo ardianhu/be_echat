@@ -45,16 +45,50 @@ router.post('/login', async (req, res) => {
     }
     
     const token = jwt.sign({id: user._id}, process.env.JWT_SECRET)
-    res.status(200).json({message: 'Login successful', token})
+    res.status(200).json({message: 'Login successful', token, user_id: user._id})
   } catch (err) {
     res.status(500).json({message: err.message})
   }
 })
 
-router.get('/home', checkAuth, (req, res) => {
-  Chat.find()
-  .then(chats => (chats.length > 0) ? res.status(200).json(chats) : res.status(404).json({message: 'No chats found'}))
-  .catch(err => res.status(500).json({message: err.message}))
+router.get('/', checkAuth, async (req, res) => {  
+  try {
+    const users = await User.find({}, 'username')
+    
+    res.status(200).json({ message: "success", users });
+  } catch (err) {
+    res.status(500).json({message: err.message})
+  }
+})
+
+router.get('/home', checkAuth, async (req, res) => {
+  const { user_id } = req.query;
+  
+  if (!user_id) {
+    return res.status(400).json({ message: 'User ID is required in the query parameters.' });
+  }
+
+  try {
+
+    const chats = await Chat.find({ $or: [{ user_id_1: user_id }, { user_id_2: user_id }] })
+    
+    const chatUserIds = chats.reduce((ids, chat) => {
+      if (chat.user_id_1 && !ids.includes(chat.user_id_1)) {
+        ids.push(chat.user_id_1);
+      }
+      if (chat.user_id_2 && !ids.includes(chat.user_id_2)) {
+        ids.push(chat.user_id_2);
+      }
+      return ids;
+    }, []);
+    
+    // Now, you can find users with these IDs
+    const usersOnChat = await User.find({ _id: { $in: chatUserIds } });
+    
+    res.status(200).json({ message: "success", chats, usersOnChat });
+  } catch (err) {
+    res.status(500).json({message: err.message})
+  }
 })
 
 module.exports = router
