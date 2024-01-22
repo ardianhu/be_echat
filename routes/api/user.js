@@ -61,6 +61,7 @@ router.get('/', checkAuth, async (req, res) => {
   }
 })
 
+
 router.get('/home', checkAuth, async (req, res) => {
   const { user_id } = req.query;
   
@@ -86,6 +87,17 @@ router.get('/home', checkAuth, async (req, res) => {
     const usersOnChat = await User.find({ _id: { $in: chatUserIds } });
     
     res.status(200).json({ message: "success", chats, usersOnChat });
+  } catch (err) {
+    res.status(500).json({message: err.message})
+  }
+})
+
+
+router.get('/:username', checkAuth, async (req, res) => {  
+  try {
+    const username = req.params.username;
+    const users = await User.find({ username: { $regex: new RegExp(username, 'i') } })
+    res.status(200).json({ message: "success", users });
   } catch (err) {
     res.status(500).json({message: err.message})
   }
